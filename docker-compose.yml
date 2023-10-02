@@ -1,0 +1,44 @@
+version: '3'
+
+services:
+  nginx:
+    image: codershisho/nginx:1.25.0
+    container_name: nginx-${PROJECT_NAME}
+    tty: true
+    ports:
+      - ${NGINX_PORT}:80
+    volumes:
+      - ${PHP_MOUNT_FOLDER}:${PUBLIC_FOLDER}
+      - ./conf.d:/etc/nginx/conf.d
+    environment:
+      TZ: ${TIME_ZONE}
+    depends_on:
+      - php
+
+  php:
+    image: codershisho/php:8.2-fpm
+    container_name: php-${PROJECT_NAME}
+    tty: true
+    ports:
+      - ${PHP_PORT}:9000
+    volumes:
+      - ${PHP_MOUNT_FOLDER}:/var/www
+    stdin_open: true
+    restart: always
+    environment:
+      TZ: ${TIME_ZONE}
+
+  db:
+    image: mariadb:10.9
+    container_name: mariadb-${PROJECT_NAME}
+    volumes:
+      - ./db_data:/var/lib/mysql
+    ports:
+      - ${DB_PORT}:3306
+    restart: always
+    environment:
+      TZ: ${TIME_ZONE}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASS}
+      MYSQL_DATABASE: ${DB_DATABASE}
+volumes:
+  db_data:
